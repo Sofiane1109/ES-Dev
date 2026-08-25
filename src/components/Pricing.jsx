@@ -86,7 +86,11 @@ function PricingCard({ plan }) {
       <p className="mt-2 text-sm text-ink-500">{tagline}</p>
 
       <div className="mt-6">
-        <span className="font-display text-xl font-bold leading-snug text-ink-800 sm:text-2xl">
+        <span
+          className={`font-display text-xl font-bold leading-snug sm:text-2xl ${
+            highlighted ? 'text-brand-500' : 'text-ink-800'
+          }`}
+        >
           {price}
         </span>
         <span className="mt-1 block text-sm text-ink-400">{priceNote}</span>

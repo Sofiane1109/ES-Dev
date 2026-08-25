@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { IconMail, IconMapPin, IconCheck } from './icons'
 
 const CONTACT_EMAIL = 'contact@esdev.be'
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function encodeForm(data) {
   return Object.keys(data)
@@ -9,17 +10,51 @@ function encodeForm(data) {
     .join('&')
 }
 
+function validate(form) {
+  const errors = {}
+
+  if (!form.name.trim()) {
+    errors.name = 'Merci d\'indiquer votre nom.'
+  } else if (form.name.trim().length < 2) {
+    errors.name = 'Ce nom semble trop court.'
+  }
+
+  if (!form.email.trim()) {
+    errors.email = 'Merci d\'indiquer votre email.'
+  } else if (!EMAIL_REGEX.test(form.email.trim())) {
+    errors.email = 'Cette adresse email ne semble pas valide.'
+  }
+
+  if (!form.message.trim()) {
+    errors.message = 'Merci de décrire brièvement votre projet.'
+  } else if (form.message.trim().length < 10) {
+    errors.message = 'Un peu court : dites-nous en un peu plus (10 caractères minimum).'
+  }
+
+  return errors
+}
+
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle') // idle | sending | success | error
 
   const handleChange = (event) => {
     const { name, value } = event.target
     setForm((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    const validationErrors = validate(form)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setErrors({})
     setStatus('sending')
 
     try {
@@ -54,6 +89,13 @@ function Contact() {
     )
   }
 
+  const fieldClass = (field) =>
+    `mt-2 w-full rounded-xl border bg-white/5 px-4 py-3 text-white placeholder:text-white/35 focus:outline-none ${
+      errors[field]
+        ? 'border-red-400/70 focus:border-red-400'
+        : 'border-white/15 focus:border-brand-400'
+    }`
+
   return (
     <section id="contact" className="bg-ink-800 py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -87,7 +129,7 @@ function Contact() {
                 <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-brand-300">
                   <IconMapPin className="h-5 w-5" />
                 </span>
-                <span className="text-white/85">Bruxelles, Belgique — à distance</span>
+                <span className="text-white/85">Bruxelles, Belgique</span>
               </li>
             </ul>
           </div>
@@ -98,6 +140,7 @@ function Contact() {
             data-netlify="true"
             netlify-honeypot="bot-field"
             onSubmit={handleSubmit}
+            noValidate
             className="rounded-2xl border border-white/10 bg-white/[0.04] p-7 lg:col-span-3 sm:p-9"
           >
             <input type="hidden" name="form-name" value="contact" />
@@ -116,12 +159,18 @@ function Contact() {
                   id="name"
                   name="name"
                   type="text"
-                  required
                   value={form.name}
                   onChange={handleChange}
-                  className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/35 focus:border-brand-400 focus:outline-none"
+                  aria-invalid={errors.name ? 'true' : 'false'}
+                  aria-describedby={errors.name ? 'name-error' : undefined}
+                  className={fieldClass('name')}
                   placeholder="Jean Dupont"
                 />
+                {errors.name && (
+                  <p id="name-error" className="mt-1.5 text-sm text-red-300">
+                    {errors.name}
+                  </p>
+                )}
               </div>
               <div>
                 <label htmlFor="email" className="text-sm font-medium text-white/80">
@@ -131,12 +180,18 @@ function Contact() {
                   id="email"
                   name="email"
                   type="email"
-                  required
                   value={form.email}
                   onChange={handleChange}
-                  className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/35 focus:border-brand-400 focus:outline-none"
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  className={fieldClass('email')}
                   placeholder="jean@monentreprise.be"
                 />
+                {errors.email && (
+                  <p id="email-error" className="mt-1.5 text-sm text-red-300">
+                    {errors.email}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -148,12 +203,18 @@ function Contact() {
                 id="message"
                 name="message"
                 rows={5}
-                required
                 value={form.message}
                 onChange={handleChange}
-                className="mt-2 w-full resize-none rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/35 focus:border-brand-400 focus:outline-none"
+                aria-invalid={errors.message ? 'true' : 'false'}
+                aria-describedby={errors.message ? 'message-error' : undefined}
+                className={`${fieldClass('message')} resize-none`}
                 placeholder="Parlez-nous de votre commerce et de ce que vous recherchez..."
               />
+              {errors.message && (
+                <p id="message-error" className="mt-1.5 text-sm text-red-300">
+                  {errors.message}
+                </p>
+              )}
             </div>
 
             {status === 'error' && (
