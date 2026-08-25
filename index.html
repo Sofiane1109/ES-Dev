@@ -1,13 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>es-dev</title>
+    <meta
+      name="description"
+      content="ES Dev conçoit des sites vitrines professionnels et rapides pour les PME et commerces. Devis gratuit sous 24h."
+    />
+    <title>ES Dev — Sites vitrines pour PME et commerces</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!--
+      Static form so Netlify's build bot can detect it at deploy time.
+      The real form is rendered by React in Contact.jsx and submitted via fetch;
+      field names below must stay in sync with it.
+    -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
   </body>
 </html>
